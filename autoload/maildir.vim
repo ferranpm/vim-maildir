@@ -89,6 +89,7 @@ function! maildir#open_folder(folder, ...)
     setlocal nomodifiable
     noremap <buffer> <cr> :call maildir#open_mail()<cr>
     noremap <buffer> R :call maildir#open_folder(b:maildir_folder, 1)<cr>
+    noremap <buffer> d :call maildir#delete_mail()<cr>:call maildir#open_folder(b:maildir_folder, 1)<cr>
     execute 'setlocal statusline=%#StatusLineNC#<cr>%#StatusLine#:\ Open\ Mail\ %#StatusLineNC#R%#StatusLine#:\ Refresh\ %#StatusLineNC#d%#StatusLine#:\ Delete\ Mail\ '
 endfunction
 
@@ -101,6 +102,18 @@ function! maildir#open_mail()
         execute 'edit '.findlines[0]
         setlocal filetype=mail
         setlocal foldlevel=0
+    else
+    endif
+endfunction
+
+function! maildir#delete_mail()
+    let U = matchstr(getline(line('.')), '\*\zs\d\+\ze\*')
+    let findlines = systemlist('find '.maildir#get_local_folder(b:maildir_folder).' -name "*U='.U.'*"')
+    if len(findlines) == 0
+        echoerr 'No such message'
+    elseif len(findlines) == 1
+        let file = findlines[0]
+        call delete(file)
     else
     endif
 endfunction

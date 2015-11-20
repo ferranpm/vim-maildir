@@ -63,13 +63,19 @@ function! maildir#open_folder(folder, ...)
         elseif match(line, 'Subject:') > 0
             call maildir#add_field(dict, U, 'subject', matchstr(line, 'Subject: \zs.*'))
         endif
+        call maildir#add_field(dict, U, 'new', match(line, '\/new\/') > 0)
     endfor
 
     let sorted_keys = sort(keys(dict), 'maildir#sort')
     let lines = []
     for k in sorted_keys
+        let flags = ''
+        if get(dict[k], 'new', 0)
+            let flags .= '>>>'
+        endif
         call add(lines,
-                    \ '*'.k.'*'.'	'
+                    \ flags
+                    \ .'*'.k.'*'.'	'
                     \ .'$$'.dict[k]['subject'].'$$'.'	'
                     \ .'<>'.dict[k]['from'].'<>'.'	'
                     \ )

@@ -1,3 +1,8 @@
+function! maildir#folder_complete(ArgLead, CmdLine, CursorPos)
+    let expanded = expand(g:mail_folder) . '/'
+    return join(map(glob(expanded.'*', 1, 1), 'substitute(v:val, expanded, "", "")'), "\n")
+endfunction
+
 " goto_buffer({name}[, {methodnew}[, {switchbuf}]])
 function! maildir#goto_buffer(name, ...) " {{{
     let ret = 1

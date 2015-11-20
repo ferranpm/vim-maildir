@@ -76,8 +76,8 @@ function! maildir#open_folder(folder, ...)
         call add(lines,
                     \ flags
                     \ .'*'.k.'*'.'	'
-                    \ .'$$'.dict[k]['subject'].'$$'.'	'
-                    \ .'<>'.dict[k]['from'].'<>'.'	'
+                    \ .'$$'.get(dict[k], 'subject', '').'$$'.'	'
+                    \ .'<>'.get(dict[k], 'from', '').'<>'.'	'
                     \ )
     endfor
 

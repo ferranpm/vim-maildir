@@ -99,7 +99,13 @@ function! maildir#open_mail()
     if len(findlines) == 0
         echoerr 'No such message'
     elseif len(findlines) == 1
-        execute 'edit '.findlines[0]
+        let file = findlines[0]
+        execute 'new '.file
+        if match(file, '\/new\/') > 0
+            let newfile = substitute(file, '\/new\/', '/cur/', '')
+            let newfile = substitute(newfile, ',\zs$', 'S', '')
+            call rename(file, newfile)
+        endif
         setlocal filetype=mail
         setlocal foldlevel=0
     else

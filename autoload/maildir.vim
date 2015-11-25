@@ -54,9 +54,9 @@ function! maildir#open_folder(folder, ...)
     for line in greplines
         let U = substitute(line, '\C^.*U=\(\d\+\).*', '\1', "")
         if match(line, 'From:') > 0
-            call maildir#add_field(dict, U, 'from', matchstr(line, 'From: \zs.*'))
+            call maildir#add_field(dict, U, 'from', maildir#decode(matchstr(line, 'From: \zs.*')))
         elseif match(line, 'Subject:') > 0
-            call maildir#add_field(dict, U, 'subject', matchstr(line, 'Subject: \zs.*'))
+            call maildir#add_field(dict, U, 'subject', maildir#decode(matchstr(line, 'Subject: \zs.*')))
         endif
         call maildir#add_field(dict, U, 'new', match(line, '\/new\/') > 0)
     endfor
@@ -86,6 +86,22 @@ function! maildir#open_folder(folder, ...)
     noremap <buffer> R :call maildir#open_folder(b:maildir_folder, 1)<cr>
     noremap <buffer> d :call maildir#delete_mail()<cr>:call maildir#open_folder(b:maildir_folder, 1)<cr>
     execute 'setlocal statusline=%#StatusLineNC#<cr>%#StatusLine#:\ Open\ Mail\ %#StatusLineNC#R%#StatusLine#:\ Refresh\ %#StatusLineNC#d%#StatusLine#:\ Delete\ Mail\ '
+endfunction
+
+function! maildir#decode(line)
+    if a:line =~ 'utf-8' || a:line =~ 'iso-8859-1'
+        let l:encoding = tolower(matchstr(a:line, '\m=?\zs\(utf-8\|iso-8859-1\)', '\1', ''))
+        let l:type = tolower(matchstr(a:line, '\m=?'.l:encoding.'?\zs\(\w\)', '\1', ''))
+        let l:line = matchstr(a:line, '\m=?'.l:encoding.'?\w?\zs[0-9A-Za-z_=]\+')
+        if l:type == 'b'
+            let l:line = system('echo "'.l:line.'" | recode /b64')
+        elseif l:type == 'q'
+            let l:line = system('echo "'.l:line.'" | recode /qp')
+        endif
+        return l:line
+    else
+        return a:line
+    endif
 endfunction
 
 function! maildir#open_mail()

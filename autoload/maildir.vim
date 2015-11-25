@@ -3,26 +3,16 @@ function! maildir#folder_complete(ArgLead, CmdLine, CursorPos)
     return join(map(glob(expanded.'*', 1, 1), 'substitute(v:val, expanded, "", "")'), "\n")
 endfunction
 
-" goto_buffer({name}[, {methodnew}[, {switchbuf}]])
-function! maildir#goto_buffer(name, ...) " {{{
-    let ret = 1
-    let methodnew = 'tabnew'
-    let switchbuf = 'usetab'
-    let oldswitchbuf = &switchbuf
-    if a:0 > 0 | let methodnew = a:1 | endif
-    if a:0 > 1 | let switchbuf = a:2 | endif
-    execute 'set switchbuf='.switchbuf
-    if bufexists(a:name)
-        execute 'sbuffer '.a:name
-        let ret = 1
+function! maildir#goto_buffer(name)
+    let l:return = bufexists(a:name)
+    if l:return
+        execute 'buffer '.a:name
     else
-        execute methodnew
+        enew
         execute 'file '.a:name
-        let ret = 0
     endif
-    execute 'set switchbuf='.oldswitchbuf
-    return ret
-endfunction " }}}
+    return l:return
+endfunction
 
 function! maildir#add_field(dict, key, field, s)
     if !has_key(a:dict, a:key)

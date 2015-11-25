@@ -128,14 +128,21 @@ function! maildir#open_mail()
     endif
 endfunction
 
+function! maildir#get_mail_file_by_uid(uid)
+    let findlines = systemlist('find '.maildir#get_local_folder(b:maildir_folder).' -name "*U='.a:uid.'*"')
+    if len(findlines) > 0
+        return findlines[0]
+    endif
+    return 0
+endfunction
+
+function! maildir#get_line_uid()
+    return matchstr(getline(line('.')), '\*\zs\d\+\ze\*')
+endfunction
+
 function! maildir#delete_mail()
-    let U = matchstr(getline(line('.')), '\*\zs\d\+\ze\*')
-    let findlines = systemlist('find '.maildir#get_local_folder(b:maildir_folder).' -name "*U='.U.'*"')
-    if len(findlines) == 0
-        echoerr 'No such message'
-    elseif len(findlines) == 1
-        let file = findlines[0]
+    let file = maildir#get_mail_file_by_uid(maildir#get_line_uid())
+    if file != 0
         call delete(file)
-    else
     endif
 endfunction

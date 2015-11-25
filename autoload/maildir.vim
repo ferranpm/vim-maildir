@@ -48,7 +48,12 @@ function! maildir#open_folder(folder, ...)
     let b:maildir_folder = folder
 
     let local_folder = maildir#get_local_folder(folder)
-    let greplines = systemlist('grep -R "^Subject\|^From:" '.local_folder.'*')
+    let greplines = []
+    if executable('ag')
+        let greplines = systemlist('ag --nogroup --nocolor "^Subject|^From:" '.local_folder)
+    else
+        let greplines = systemlist('grep -R "^Subject\|^From:" '.local_folder.'*')
+    endif
     let dict = {}
 
     for line in greplines
